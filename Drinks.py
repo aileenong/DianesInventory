@@ -58,7 +58,7 @@ def create_tables():
         item_id INTEGER PRIMARY KEY AUTOINCREMENT,  
         item_name TEXT,
         category TEXT,
-        quantity INTEGER,
+        quantity REAL,
         fridge_no INTEGER
     )
     """)
@@ -67,7 +67,7 @@ def create_tables():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         item_id INTEGER NOT NULL,
         item_name TEXT,
-        quantity INTEGER,
+        quantity REAL,
         selling_price REAL,
         total_sale REAL,
         cost REAL,
@@ -94,7 +94,7 @@ def create_tables():
         item_name TEXT,
         category TEXT,
         action TEXT,
-        quantity INTEGER,
+        quantity REAL,
         unit_cost REAL,
         selling_price REAL,
         user TEXT,
@@ -105,8 +105,8 @@ def create_tables():
     CREATE TABLE IF NOT EXISTS pricing_tiers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     item_id INTEGER NOT NULL,
-    min_qty INTEGER NOT NULL,
-    max_qty INTEGER,  -- NULL means no upper limit
+    min_qty REAL NOT NULL,
+    max_qty REAL,  -- NULL means no upper limit
     price_per_unit REAL NOT NULL,
     label TEXT,
     FOREIGN KEY (item_id) REFERENCES items(item_id)
@@ -1126,7 +1126,12 @@ elif st.session_state.logged_in:
         else:
             # Show current inventory list
             st.subheader("Current Inventory")
-            st.dataframe(items_df[['item_id','item_name','category','quantity','fridge_no']])
+            #st.dataframe(items_df[['item_id','item_name','category','quantity','fridge_no']])
+
+            styled_inventory = items_df[['item_id', 'item_name', 'category', 'quantity', 'fridge_no']].style.format({
+                'quantity': '{:,.2f}'
+            })
+            st.dataframe(styled_inventory, width='stretch')
 
         # --- Collapsible section: Add/Update Stock ---
         with st.expander("➕ Add or Update Stock", expanded=False):
@@ -1156,6 +1161,12 @@ elif st.session_state.logged_in:
 
                     st.write("Per-Fridge Breakdown:")
                     st.dataframe(item_rows[['fridge_no','quantity']])
+
+                    styled_inventory = item_rows[['fridge_no','quantity']].style.format({
+                        'quantity': '{:,.2f}'
+                    })
+                    st.dataframe(styled_inventory, width='stretch')
+
                 else:
                     st.warning(f"No records found for item '{selected_item}'.")
                     current_stock = None
@@ -1171,12 +1182,14 @@ elif st.session_state.logged_in:
                 else selected_item.split(" - ")[1]
             )
             item_id = selected_item.split(" - ")[0]
-            quantity = st.number_input("Quantity to Add", min_value=1, value=st.session_state.quantity)
+            #quantity = st.number_input("Quantity to Add", min_value=0.5, value=st.session_state.quantity)
+            quantity = st.number_input("Quantity", min_value=0.5, value=0.5, step=0.1, format="%.2f")
             fridge_no = st.text_input("Fridge No", value=0)
 
             if st.button("Save"):
                 if item_id and category_name:
-                    add_or_update_item(item_id, item_name.strip().upper(), category_name.strip().upper(), quantity, fridge_no, st.session_state.username)
+                    qty_value = float(quantity)
+                    add_or_update_item(item_id, item_name.strip().upper(), category_name.strip().upper(), qty_value, fridge_no, st.session_state.username)
                     st.success(f"Item '{item_name}' in category '{category_name}' updated successfully!")
                     st.rerun()
                 else:
