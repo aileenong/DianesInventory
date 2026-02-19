@@ -1,9 +1,13 @@
 streamlit
 streamlit-option-menu
-qrcode
 pandas
 plotly
-PyMuPDF
 opencv-python
 pyzbar
+pymupdf
 reportlab
+supabase
+fpdf2
+openpyxl
+xlrd
+python-dateutil
