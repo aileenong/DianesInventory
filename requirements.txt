@@ -2,7 +2,7 @@ streamlit
 streamlit-option-menu
 pandas
 plotly
-opencv-python
+opencv-python-headless
 pyzbar
 pymupdf
 reportlab
@@ -11,3 +11,4 @@ fpdf2
 openpyxl
 xlrd
 python-dateutil
+
